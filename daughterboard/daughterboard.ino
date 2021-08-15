@@ -12,24 +12,37 @@
 
 #include <Wire.h>
 
+int received = 0x0000;
+int sent = 0x0000;
+
 void setup()
 {
-  Wire.begin(0x04);                // join i2c bus with address #4
-  Wire.onReceive(receiveEvent); // register event
-  Serial.begin(9600);           // start serial for output
+  Wire.begin(0x04); //join i2c with address 4
+  Wire.onReceive(receive); //setup handler for recieving
+  Wire.onRequest(respond); //setup handler for sending
+  Serial.begin(115200);
 }
 
 void loop()
 {
-  delay(100);
+  for(sent < 0xFFF; sent++;)
+  {
+    delay(100);
+  }
 }
 
-// function that executes whenever data is received from master
-// this function is registered as an event, see setup()
-void receiveEvent(int howMany)
+void receive(int numBytes)
 {
-  byte high = Wire.read(); // receive byte as a character
+  byte high = Wire.read();
   byte low = Wire.read();
-  int recieved = high*0x100 + low;
-  Serial.println(recieved, HEX);
+  received = high*0x100 + low;
+  Serial.println(received, HEX);
+}
+
+void respond()
+{
+  byte high = sent / 0x0100;
+  byte low = sent % 0x0100;
+  Wire.write(high);
+  Wire.write(low);
 }
