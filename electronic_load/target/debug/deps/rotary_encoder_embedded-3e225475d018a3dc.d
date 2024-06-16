@@ -1,0 +1,7 @@
+D:\Users\elect\Documents\GitHub\FPV-Static-Electronic_Load\electronic_load\target\debug\deps\librotary_encoder_embedded-3e225475d018a3dc.rmeta: C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\lib.rs C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\angular_velocity.rs C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\standard.rs
+
+D:\Users\elect\Documents\GitHub\FPV-Static-Electronic_Load\electronic_load\target\debug\deps\rotary_encoder_embedded-3e225475d018a3dc.d: C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\lib.rs C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\angular_velocity.rs C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\standard.rs
+
+C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\lib.rs:
+C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\angular_velocity.rs:
+C:\Users\Daniel\ Raymond\.cargo\registry\src\index.crates.io-6f17d22bba15001f\rotary-encoder-embedded-0.3.0\src\standard.rs:

@@ -1,0 +1,1 @@
+RotaryEncoder<InitalizeMode, rp2040_hal::gpio::Pin<Gpio2, rp2040_hal::gpio::Input<rp2040_hal::gpio::PullUp>>, rp2040_hal::gpio::Pin<Gpio3, rp2040_hal::gpio::Input<rp2040_hal::gpio::PullUp>>>
