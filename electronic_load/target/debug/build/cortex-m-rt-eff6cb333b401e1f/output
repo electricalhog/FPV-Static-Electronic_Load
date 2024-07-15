@@ -1,0 +1,3 @@
+cargo:rustc-link-search=/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/debug/build/cortex-m-rt-eff6cb333b401e1f/out
+cargo:rerun-if-changed=build.rs
+cargo:rerun-if-changed=link.x.in

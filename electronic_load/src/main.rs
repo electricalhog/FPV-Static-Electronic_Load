@@ -1,24 +1,43 @@
 #![no_std]
 #![no_main]
 
-use cortex_m_rt::entry;
-use embedded_hal::{digital::v2::InputPin, timer::CountDown};
-use rp2040_hal::{clocks::init_clocks_and_plls, gpio::{bank0::{Gpio8, Gpio9}, Input, Pin, PullUp}, pac::{self, Interrupt, NVIC}, sio::Sio, timer::{self, Timer}, watchdog::Watchdog, Clock};
+use cortex_m_rt as _;
+use cortex_m::{self as _, interrupt::disable};
+// Ensure we halt the program on panic (if we don't mention this crate it won't
+// be linked)
 use panic_halt as _;
+
+// Alias for our HAL crate
+use rp2040_hal as hal;
+
+// Some traits we need
+use embedded_hal::{digital::OutputPin, pwm::SetDutyCycle};
+use rp2040_hal::clocks::Clock;
+
+use defmt as _;
+
+// A shorter alias for the Peripheral Access Crate, which provides low-level
+// register access
+use hal::pac;
 use rotary_encoder_embedded::{Direction, RotaryEncoder};
 
+/// The linker will place this boot block at the start of our program image. We
+/// need this to help the ROM bootloader get our code up and running.
+/// Note: This boot block is not necessary when using a rp-hal based BSP
+/// as the BSPs already perform this step.
+#[link_section = ".boot2"]
+#[used]
+pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_GENERIC_03H;
 
-const TIMER_FREQ_HZ: u32 = 900;
-
-#[entry]
+#[rp2040_hal::entry]
 fn main() -> ! {
     // Grab our singleton objects
     let mut pac = pac::Peripherals::take().unwrap();
     let core = pac::CorePeripherals::take().unwrap();
 
     // External high-speed crystal on the pico board is 12Mhz
-    let mut watchdog = Watchdog::new(pac.WATCHDOG);
-    let clocks = init_clocks_and_plls(
+    let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
+    let clocks = hal::clocks::init_clocks_and_plls(
         12_000_000,
         pac.XOSC,
         pac.CLOCKS,
@@ -27,82 +46,79 @@ fn main() -> ! {
         &mut pac.RESETS,
         &mut watchdog,
     )
-    .ok()
     .unwrap();
 
-    let sio = Sio::new(pac.SIO);
-    let pins = rp2040_hal::gpio::Pins::new(
+    let sio = hal::Sio::new(pac.SIO);
+    let pins = hal::gpio::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
         sio.gpio_bank0,
         &mut pac.RESETS,
     );
-
     // Configure rotary encoder pins
-    let pin_a: Pin<Gpio8, Input<PullUp>> = pins.gpio8.into_pull_up_input();
-    let pin_b: Pin<Gpio9, Input<PullUp>> = pins.gpio9.into_pull_up_input();
+    let pin_a = pins.gpio8.into_pull_up_input();
+    let pin_b = pins.gpio9.into_pull_up_input();
 
+    // The delay object lets us wait for specified amounts of time (in
+    // milliseconds)
+    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
+
+    // Init PWM
+    let mut pwm_slices = hal::pwm::Slices::new(pac.PWM, &mut pac.RESETS);
+
+    // Configure PWM
+    let pwm = &mut pwm_slices.pwm5;
+    pwm.set_ph_correct();
+    pwm.enable();
+
+    // Output channel B on PWM5 to GPIO27
+    let channel = &mut pwm.channel_b;
+    channel.output_to(pins.gpio27);
+    
     // Create the rotary encoder instance
     let mut encoder = RotaryEncoder::new(pin_a, pin_b).into_standard_mode();
 
-    let mut position: i32 = 0;
+    let mut position: u16 = 0;
 
-    let mut timer = Timer::new(pac.TIMER, &mut pac.RESETS);
-        
-    // Calculate timer count for 900Hz
-    let timer_freq_hz = clocks.system_clock.freq().0;
-    let timer_count = timer_freq_hz / TIMER_FREQ_HZ;
+    // Configure DISABLE control pin and set to enabled
+    let mut disable_pin = pins.gpio6.into_push_pull_output();
+    disable_pin.set_low().unwrap();
+
+    // let mut timer = Timer::new(pac.TIMER, &mut pac.RESETS);
+    //    
+    // // Calculate timer count for 900Hz
+    // let timer_count = Microseconds::new(1_000_000/TIMER_FREQ_HZ);
+    // // Set timer count down
+    // timer.count_down().start(timer_count);
     
-    // Set timer count down
-    timer::CountDown::start(&mut timer, timer_count);
     
-     // Enable the timer interrupt in the NVIC
-     unsafe {
-        NVIC::unmask(Interrupt::TIMER_IRQ_0);
-    }
+    //  // Enable the timer interrupt in the NVIC
+    //  unsafe {
+    //     NVIC::unmask(Interrupt::TIMER_IRQ_0);
+    // }
 
 
     loop {
-    }
-}
-
-
-#[Interrupt]
-fn TIMER_IRQ_0() {
-    static mut TIMER: Option<Timer> = None;
-
-    // Initialize the static TIMER variable on the first interrupt call
-    if unsafe { TIMER.is_none() } {
-        let pac = unsafe { pac::Peripherals::steal() };
-        let mut timer = Timer::new(pac.TIMER, &mut pac.RESETS);
-        
-        // Set timer countdown
-        let clocks = unsafe { pac::CLOCKS.steal() };
-        let timer_freq_hz = clocks.system_clock.freq().0;
-        let timer_count = timer_freq_hz / TIMER_FREQ_HZ;
-        
-        timer.start(timer_count);
-        TIMER.replace(timer);
-    }
-
-    if let Some(timer) = TIMER.as_mut() {
-        // Clear the interrupt flag
-        timer.clear_interrupt(timer::Alarm::Alarm0);
-
-        // Your interrupt handling code here
-        // For example, you could toggle an LED or increment a counter
         match encoder.update() {
             Direction::Clockwise => {
-                position += 1;
+                if position < channel.max_duty_cycle(){
+                    position += 1000; 
+                }
                 // Handle clockwise rotation (e.g., increment position)
             }
             Direction::Anticlockwise => {
-                position -= 1;
+                if position > 1000{
+                    position -= 1000;
+                }
                 // Handle counterclockwise rotation (e.g., decrement position)
             }
             Direction::None => {
                 // Do nothing
             }
         }
+
+        let _ = channel.set_duty_cycle(position);
+
+        delay.delay_us(1111);
     }
 }

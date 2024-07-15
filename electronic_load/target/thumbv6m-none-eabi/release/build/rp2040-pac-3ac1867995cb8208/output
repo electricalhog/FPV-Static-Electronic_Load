@@ -1,0 +1,3 @@
+cargo:rustc-link-search=/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/release/build/rp2040-pac-3ac1867995cb8208/out
+cargo:rerun-if-changed=device.x
+cargo:rerun-if-changed=build.rs

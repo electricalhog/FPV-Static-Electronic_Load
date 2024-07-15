@@ -1,0 +1,9 @@
+/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/debug/deps/libembedded_io-283684a9d7085a6e.rmeta: /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/lib.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/mod.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/slice_mut.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/slice_ref.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/../README.md
+
+/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/debug/deps/embedded_io-283684a9d7085a6e.d: /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/lib.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/mod.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/slice_mut.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/slice_ref.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/../README.md
+
+/home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/lib.rs:
+/home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/mod.rs:
+/home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/slice_mut.rs:
+/home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/impls/slice_ref.rs:
+/home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.6.1/src/../README.md:
