@@ -1,9 +1,0 @@
-/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/release/deps/librotary_encoder_embedded-30fc3fdeb26ffa1d.rmeta: /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/lib.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/angular_velocity.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/standard.rs
-
-/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/release/deps/librotary_encoder_embedded-30fc3fdeb26ffa1d.rlib: /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/lib.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/angular_velocity.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/standard.rs
-
-/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/release/deps/rotary_encoder_embedded-30fc3fdeb26ffa1d.d: /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/lib.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/angular_velocity.rs /home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/standard.rs
-
-/home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/lib.rs:
-/home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/angular_velocity.rs:
-/home/daniel/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rotary-encoder-embedded-0.3.0/src/standard.rs:
