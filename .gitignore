@@ -1,0 +1,12 @@
+# Rust build artifacts
+electronic_load/target/
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# KiCad backups
+hardware/*-backups/
+hardware/*.kicad_sch-bak
+hardware/*.kicad_pcb-bak
