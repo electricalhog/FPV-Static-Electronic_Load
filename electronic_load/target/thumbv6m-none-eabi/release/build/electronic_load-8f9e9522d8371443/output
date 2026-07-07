@@ -1,2 +1,0 @@
-cargo:rustc-link-search=/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/release/build/electronic_load-8f9e9522d8371443/out
-cargo:rerun-if-changed=memory.x

@@ -1,4 +1,0 @@
-cargo:rustc-link-lib=static=cortex-m
-cargo:rustc-link-search=/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/release/build/cortex-m-81fec8fda8dd3208/out
-cargo:rustc-cfg=cortex_m
-cargo:rustc-cfg=armv6m
