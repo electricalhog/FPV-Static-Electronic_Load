@@ -2,18 +2,27 @@
 Schematic completeness tests for FPV Static Electronic Load.
 Run:  pytest hardware/test_schematic.py -v
 """
-import os, sys
+import os, sys, glob
 import pytest
 
-SITE   = '/home/daniel/.cache/uv/archive-v0/7cuypMzPSfPk6TCt/lib/python3.12/site-packages'
-SYMLIB = (
-    '/var/lib/flatpak/runtime/org.kicad.KiCad.Library.Symbols'
-    '/x86_64/stable'
-    '/39e59455ff7e47fc086657be934897b56be3f4c774b0f56c9ce20e9fa6efe834'
-    '/files/symbols'
-)
-SCH = '/home/daniel/GitHub/FPV-Static-Electronic_Load/hardware/electronic_load.kicad_sch'
+SITE = '/home/daniel/.cache/uv/archive-v0/7cuypMzPSfPk6TCt/lib/python3.12/site-packages'
+SCH  = '/home/daniel/GitHub/FPV-Static-Electronic_Load/hardware/electronic_load.kicad_sch'
 
+
+def _find_symlib():
+    """Same resolution as build_schematic.py: env var, flatpak (any hash), apt."""
+    if p := os.environ.get('KICAD_SYMBOL_DIR'):
+        return p
+    probe = 'MCU_Module.kicad_sym'
+    for m in reversed(sorted(glob.glob(
+            '/var/lib/flatpak/runtime/org.kicad.KiCad.Library.Symbols'
+            '/x86_64/stable/*/files/symbols'))):
+        if os.path.exists(os.path.join(m, probe)):
+            return m
+    return '/usr/share/kicad/symbols'
+
+
+SYMLIB = _find_symlib()
 sys.path.insert(0, SITE)
 os.environ['KICAD_SYMBOL_DIR']  = SYMLIB
 os.environ['KICAD6_SYMBOL_DIR'] = SYMLIB
@@ -39,6 +48,14 @@ SIGNAL_NETS = [
 
 SWD_NETS = ['SWDIO', 'SWDCLK', 'NRESET']
 
+# Analog frontend (per-FET linear loops; see hardware/sim/)
+ANALOG_NETS = [
+    'VF1', 'VSET',                          # setpoint DAC filter
+    'EIN1', 'EA1', 'NB1', 'PB1', 'GBUF1', 'GATE1',   # ch A discrete class-AB
+    'EIN2', 'EA2', 'BOUT2', 'GATE2',                 # ch B BUF634A
+    'VDUT',                                          # shared drain bus
+]
+
 
 def _label_counts(sch):
     from collections import Counter
@@ -55,6 +72,30 @@ def test_swd_nets_present(sch):
     counts = _label_counts(sch)
     missing = [n for n in SWD_NETS if counts[n] < 1]
     assert not missing, f"SWD net labels missing: {missing}"
+
+
+def test_analog_nets_each_appear_twice(sch):
+    counts = _label_counts(sch)
+    missing = [n for n in ANALOG_NETS if counts[n] < 2]
+    assert not missing, f"Analog nets with fewer than 2 label endpoints: {missing}"
+
+
+def test_vdut_bus_reaches_both_fets_and_connector(sch):
+    counts = _label_counts(sch)
+    assert counts['VDUT'] >= 3, (
+        f"VDUT should appear on Q7 drain, Q8 drain and J5: got {counts['VDUT']}"
+    )
+
+
+def test_both_gate_buffer_variants_present(sch):
+    refs = {c.reference: c.value for c in sch.components.all()}
+    # discrete class-AB variant
+    assert refs.get('Q5') == 'BD139' and refs.get('Q6') == 'BD140'
+    # all-in-one variant
+    assert refs.get('U8', '').startswith('BUF634')
+    # both power FETs and TGHG shunts
+    assert refs.get('Q7') == 'IXFN360N10T' and refs.get('Q8') == 'IXFN360N10T'
+    assert refs.get('R26') == '2m TGHG' and refs.get('R29') == '2m TGHG'
 
 
 # ── Power symbols ───────────────────────────────────────────────────────────

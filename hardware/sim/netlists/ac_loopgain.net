@@ -1,0 +1,22 @@
+* AC loop-gain of one per-FET linear-load channel.
+* Method: loop closed at DC through Lbig (1 kH) so the bias point is the true
+* closed-loop operating point; AC injected into the buffer side through Cbig.
+* T(s) = V(EA)/V(GDRV)  (includes the integrator's inversion).
+* Bias: Id = Vset/(Kcs*Rs) = 2.0/(50*1m) = 40 A  -> worst-case-ish gm=72 S.
+.include _common.inc
+
+Vset  VSET 0 1.6
+Vdut  DUT  0 24
+Vcc   VCC  0 15
+
+Xch VSET DUT VCC GATE SRC EA GDRV FB CHANNEL
+
+* DC-closed / AC-open loop break between error-amp out and gate-buffer in
+Lbig EA   GDRV 1k
+Cbig inj  GDRV 1k
+Vinj inj  0    AC 1
+
+.ac dec 60 1 10meg
+.probe V(EA) V(GDRV) V(GATE) V(SRC) V(FB)
+.backanno
+.end

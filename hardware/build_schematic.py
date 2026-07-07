@@ -130,6 +130,57 @@ add('Connector_Generic:Conn_01x03', 'J3', 'Gate_Drive', 230, 155,
 add('Connector_Generic:Conn_01x05', 'J4', 'SWD_Debug', 25, 145,
     fp='Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical')
 
+# ─────────────────────────────────────────────────────────────────────────────
+# ANALOG FRONTEND (per-FET linear-load channels, sim: hardware/sim/)
+# Ch A = discrete class-AB buffer (BD139/BD140);  Ch B = BUF634A all-in-one.
+# FETs + TGHG shunts are chassis-mounted (SOT-227 on shared heatsink,
+# short bus bars); drawn here because they are electrically part of the loop.
+# ─────────────────────────────────────────────────────────────────────────────
+
+_FP_R    = 'Resistor_SMD:R_0603_1608Metric'
+_FP_C    = 'Capacitor_SMD:C_0603_1608Metric'
+_FP_SOT  = 'Package_TO_SOT_THT:SOT-227'
+_FP_OPA  = 'Package_TO_SOT_SMD:SOT-23-5'
+_FP_126  = 'Package_TO_SOT_THT:TO-126-3_Vertical'
+_FP_D    = 'Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal'
+_FP_BUF  = 'Package_SO:HSOP-8-1EP_3.9x4.9mm_P1.27mm_EP2.41x3.1mm'
+
+# Setpoint DAC: Pico PWM -> 2-pole RC -> VSET (shared by all channels)
+add('Device:R', 'R20', '1k',   60, 190, rot=90, fp=_FP_R)
+add('Device:C', 'C20', '100nF', 70, 198, fp=_FP_C)
+add('Device:R', 'R21', '1k',   85, 190, rot=90, fp=_FP_R)
+add('Device:C', 'C21', '100nF', 95, 198, fp=_FP_C)
+
+# ── Channel A: OPA192 error amp + discrete class-AB (BD139/BD140) ──────────
+add('Amplifier_Operational:LMV321', 'U4', 'OPA192', 120, 215, fp=_FP_OPA)
+add('Device:R', 'R22', '10k',  100, 222, rot=90, fp=_FP_R)     # Rin (ISENSE1)
+add('Device:C', 'C22', '1.8nF C0G', 120, 202, fp=_FP_C)        # Cf integrator
+add('Device:R', 'R23', '3.3k', 145, 200, fp=_FP_R)             # top bias
+add('Diode:1N4148', 'D3', '1N4148', 145, 210, fp=_FP_D)
+add('Diode:1N4148', 'D4', '1N4148', 145, 220, fp=_FP_D)
+add('Device:R', 'R24', '3.3k', 145, 230, fp=_FP_R)             # bottom bias
+add('Transistor_BJT:BD139', 'Q5', 'BD139', 165, 205, fp=_FP_126)
+add('Transistor_BJT:BD140', 'Q6', 'BD140', 165, 225, fp=_FP_126)
+add('Device:R', 'R25', '4R7', 180, 215, rot=90, fp=_FP_R)      # gate stopper
+add('Transistor_FET:Q_NMOS_GDS', 'Q7', 'IXFN360N10T', 200, 215, fp=_FP_SOT)
+add('Device:R', 'R26', '2m TGHG', 205, 235, fp=_FP_SOT)
+add('Device:C', 'C23', '100nF', 105, 200, fp=_FP_C)            # U4 decoupling
+
+# ── Channel B: OPA192 error amp + BUF634A buffer ────────────────────────────
+add('Amplifier_Operational:LMV321', 'U7', 'OPA192', 120, 265, fp=_FP_OPA)
+add('Device:R', 'R27', '10k',  100, 272, rot=90, fp=_FP_R)     # Rin (ISENSE2)
+add('Device:C', 'C24', '1.8nF C0G', 120, 252, fp=_FP_C)        # Cf integrator
+add('Amplifier_Buffer:BUF634AxDDA', 'U8', 'BUF634A', 150, 265, fp=_FP_BUF)
+add('Device:R', 'R28', '4R7', 180, 265, rot=90, fp=_FP_R)      # gate stopper
+add('Transistor_FET:Q_NMOS_GDS', 'Q8', 'IXFN360N10T', 200, 265, fp=_FP_SOT)
+add('Device:R', 'R29', '2m TGHG', 205, 285, fp=_FP_SOT)
+add('Device:C', 'C25', '100nF', 105, 250, fp=_FP_C)            # U7 decoupling
+add('Device:C', 'C26', '100nF', 160, 250, fp=_FP_C)            # U8 decoupling
+
+# DUT power bus (drains) – heavy connector / bus-bar lugs
+add('Connector_Generic:Conn_01x02', 'J5', 'DUT_BUS', 230, 195,
+    fp='Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical')
+
 sch.save_as(OUT)
 print("Pass 1 complete – symbols placed.")
 
@@ -295,6 +346,89 @@ nets = [
 ]
 
 for net, x, y in nets:
+    sch.add_label(net, position=(x, y))
+
+# ── Analog frontend pins ─────────────────────────────────────────────────────
+# Setpoint DAC filter
+r20_l, r20_r = pin('R20', '2'), pin('R20', '1')
+r21_l, r21_r = pin('R21', '2'), pin('R21', '1')
+c20_t, c20_b = pin('C20', '1'), pin('C20', '2')
+c21_t, c21_b = pin('C21', '1'), pin('C21', '2')
+
+# Channel A
+u4 = {n: pin('U4', n) for n in ('1', '2', '3', '4', '5')}   # +,V-,-,out,V+
+r22_l, r22_r = pin('R22', '2'), pin('R22', '1')
+c22_t, c22_b = pin('C22', '1'), pin('C22', '2')
+r23_t, r23_b = pin('R23', '1'), pin('R23', '2')
+r24_t, r24_b = pin('R24', '1'), pin('R24', '2')
+d3_k,  d3_a  = pin('D3', '1'),  pin('D3', '2')
+d4_k,  d4_a  = pin('D4', '1'),  pin('D4', '2')
+q5 = {n: pin('Q5', n) for n in ('1', '2', '3')}             # E,C,B
+q6 = {n: pin('Q6', n) for n in ('1', '2', '3')}
+r25_l, r25_r = pin('R25', '2'), pin('R25', '1')
+q7 = {n: pin('Q7', n) for n in ('1', '2', '3')}             # G,D,S
+r26_t, r26_b = pin('R26', '1'), pin('R26', '2')
+c23_t, c23_b = pin('C23', '1'), pin('C23', '2')
+
+# Channel B
+u7 = {n: pin('U7', n) for n in ('1', '2', '3', '4', '5')}
+r27_l, r27_r = pin('R27', '2'), pin('R27', '1')
+c24_t, c24_b = pin('C24', '1'), pin('C24', '2')
+u8 = {n: pin('U8', n) for n in ('1', '3', '4', '6', '7')}   # BW,IN,V-,OUT,V+
+r28_l, r28_r = pin('R28', '2'), pin('R28', '1')
+q8 = {n: pin('Q8', n) for n in ('1', '2', '3')}
+r29_t, r29_b = pin('R29', '1'), pin('R29', '2')
+c25_t, c25_b = pin('C25', '1'), pin('C25', '2')
+c26_t, c26_b = pin('C26', '1'), pin('C26', '2')
+
+j5 = {str(n): pin('J5', str(n)) for n in range(1, 3)}
+
+# +15V analog rail
+for pt in (r23_t, q5['2'], u4['5'], u7['5'], u8['7'], c23_t, c25_t, c26_t):
+    pwr('+15V', *pt)
+
+# GND for the analog stage
+for pt in (c20_b, c21_b, r24_b, q6['2'], u4['2'], u7['2'], u8['4'], u8['1'],
+           r26_b, r29_b, c23_b, c25_b, c26_b, j5['2']):
+    pwr('GND', *pt)
+
+anets = [
+    # Setpoint chain: GATE_PWM -> RC -> RC -> VSET
+    ('GATE_PWM', *r20_l),
+    ('VF1',      *r20_r), ('VF1', *c20_t), ('VF1', *r21_l),
+    ('VSET',     *r21_r), ('VSET', *c21_t),
+    ('VSET',     *u4['1']), ('VSET', *u7['1']),
+
+    # Channel A error amp + integrator
+    ('ISENSE1',  *r22_l),
+    ('EIN1',     *r22_r), ('EIN1', *u4['3']), ('EIN1', *c22_t),
+    ('EA1',      *u4['4']), ('EA1', *c22_b),
+    ('EA1',      *d3_k), ('EA1', *d4_a),          # class-AB input node
+    # bias chain and output pair
+    ('NB1',      *r23_b), ('NB1', *d3_a), ('NB1', *q5['3']),
+    ('PB1',      *r24_t), ('PB1', *d4_k), ('PB1', *q6['3']),
+    ('GBUF1',    *q5['1']), ('GBUF1', *q6['1']), ('GBUF1', *r25_l),
+    ('GATE1',    *r25_r), ('GATE1', *q7['1']),
+    # power FET + TGHG shunt (SOT-227 pair on shared heatsink)
+    ('VDUT',     *q7['2']),
+    ('SH1_P',    *q7['3']), ('SH1_P', *r26_t),
+    ('SH1_N',    *r26_b),
+
+    # Channel B error amp + integrator + BUF634A
+    ('ISENSE2',  *r27_l),
+    ('EIN2',     *r27_r), ('EIN2', *u7['3']), ('EIN2', *c24_t),
+    ('EA2',      *u7['4']), ('EA2', *c24_b), ('EA2', *u8['3']),
+    ('BOUT2',    *u8['6']), ('BOUT2', *r28_l),
+    ('GATE2',    *r28_r), ('GATE2', *q8['1']),
+    ('VDUT',     *q8['2']),
+    ('SH2_P',    *q8['3']), ('SH2_P', *r29_t),
+    ('SH2_N',    *r29_b),
+
+    # DUT bus
+    ('VDUT',     *j5['1']),
+]
+
+for net, x, y in anets:
     sch.add_label(net, position=(x, y))
 
 # ── Local wires (RC filter junctions) ────────────────────────────────────────
