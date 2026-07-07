@@ -1,1 +1,0 @@
-/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/release/electronic_load: /home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/build.rs /home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/memory.x /home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/src/main.rs

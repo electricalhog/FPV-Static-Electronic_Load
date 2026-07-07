@@ -1,4 +1,0 @@
-cargo:rustc-link-search=/home/daniel/Documents/GitHub/FPV-Static-Electronic_Load/electronic_load/target/thumbv6m-none-eabi/release/build/defmt-6a32cf265764faa4/out
-cargo:rustc-cfg=no_cas
-cargo:rustc-check-cfg=cfg(c_variadic)
-cargo:rustc-check-cfg=cfg(no_cas)
