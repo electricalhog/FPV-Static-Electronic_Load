@@ -31,6 +31,7 @@ from pathlib import Path
 # ── Symbol library resolution ─────────────────────────────────────────────────
 # Priority order: env var → flatpak (any hash) → apt/snap install
 _PROBE_LIB = 'MCU_Module.kicad_sym'   # must be present for a complete install
+_PICO_SYMBOL = 'RaspberryPi_Pico'
 
 def _find_symlib():
     if p := os.environ.get('KICAD_SYMBOL_DIR'):
@@ -60,6 +61,31 @@ def _find_symlib():
 SYMLIB = _find_symlib()
 OUT    = str(Path(__file__).parent / 'electronic_load.kicad_sch')
 
+def _symbol_in_file(sym_file: Path, symbol: str) -> bool:
+    try:
+        return f'(symbol "{symbol}"' in sym_file.read_text(encoding='utf-8', errors='ignore')
+    except OSError:
+        return False
+
+def _resolve_pico_lib_id():
+    preferred = Path(SYMLIB) / f'{_PROBE_LIB}'
+    if preferred.exists() and _symbol_in_file(preferred, _PICO_SYMBOL):
+        return f'{Path(_PROBE_LIB).stem}:{_PICO_SYMBOL}'
+
+    search_roots = [Path(SYMLIB), Path(__file__).resolve().parent.parent]
+    seen = set()
+    for root in search_roots:
+        if not root.exists():
+            continue
+        for sym_file in root.rglob('*.kicad_sym'):
+            sym_file = sym_file.resolve()
+            if sym_file in seen:
+                continue
+            seen.add(sym_file)
+            if _symbol_in_file(sym_file, _PICO_SYMBOL):
+                return f'{sym_file.stem}:{_PICO_SYMBOL}'
+    return None
+
 # Add local uv cache site-packages only when kicad_sch_api isn't already importable
 try:
     import kicad_sch_api  # noqa: F401 – already on path (CI, venv, etc.)
@@ -75,6 +101,18 @@ from kicad_sch_api import create_schematic, load_schematic, SymbolLibraryCache
 cache = SymbolLibraryCache()
 cache.add_library_path(SYMLIB)
 cache.discover_libraries()
+
+U1_LIB_ID = _resolve_pico_lib_id()
+if U1_LIB_ID is None:
+    if Path(OUT).exists():
+        print(
+            f"Warning: Symbol '{_PICO_SYMBOL}' not found in discovered libraries. "
+            f"Skipping schematic regeneration and using existing {OUT}."
+        )
+        sys.exit(0)
+    raise RuntimeError(
+        f"Symbol '{_PICO_SYMBOL}' not found in discovered libraries and no existing schematic found at {OUT}."
+    )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PASS 1 – Symbol placement
@@ -97,7 +135,7 @@ def add(lib_sym, ref, val, x, y, rot=0, fp='', **kw):
                  position=(x, y), rotation=rot, footprint=fp, **kw)
 
 # Microcontroller
-add('MCU_Module:RaspberryPi_Pico', 'U1', 'RaspberryPi_Pico',
+add(U1_LIB_ID, 'U1', 'RaspberryPi_Pico',
     80, 100, fp='MCU_Module:RaspberryPi_Pico')
 
 # Current sense amplifiers
