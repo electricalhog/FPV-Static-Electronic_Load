@@ -34,7 +34,9 @@ _PROBE_LIB = 'MCU_Module.kicad_sym'   # must be present for a complete install
 
 def _find_symlib():
     if p := os.environ.get('KICAD_SYMBOL_DIR'):
-        return p
+        if os.path.exists(os.path.join(p, _PROBE_LIB)):
+            return p
+        print(f"Invalid library path from KICAD_SYMBOL_DIR: {p} (missing {_PROBE_LIB})")
     # flatpak (glob so any runtime hash works; MCU_Module present since KiCad 6)
     matches = sorted(glob.glob(
         '/var/lib/flatpak/runtime/org.kicad.KiCad.Library.Symbols'
@@ -42,6 +44,10 @@ def _find_symlib():
     for m in reversed(matches):      # newest hash first
         if os.path.exists(os.path.join(m, _PROBE_LIB)):
             return m
+    # repository fallback (if symbol libraries are vendored)
+    repo_root = Path(__file__).resolve().parent.parent
+    for m in repo_root.rglob(_PROBE_LIB):
+        return str(m.parent)
     # apt/snap install: /usr/share/kicad/symbols (KiCad 7+ from PPA is complete)
     apt = '/usr/share/kicad/symbols'
     if os.path.exists(os.path.join(apt, _PROBE_LIB)):
