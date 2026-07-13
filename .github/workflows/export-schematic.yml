@@ -21,9 +21,17 @@ jobs:
 
       - name: Install KiCad
         run: |
-          sudo add-apt-repository --yes ppa:kicad/kicad-9-releases
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends kicad
+          for attempt in 1 2 3; do
+            echo "KiCad install attempt ${attempt}/3"
+            if sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends kicad kicad-symbols; then
+              exit 0
+            fi
+            if [ "${attempt}" -eq 3 ]; then
+              echo "KiCad installation failed after 3 attempts."
+              exit 1
+            fi
+            sleep "$((attempt * 10))"
+          done
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5

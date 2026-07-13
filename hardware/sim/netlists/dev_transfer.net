@@ -1,0 +1,10 @@
+* IXFN360N10T model validation: transfer curve Id(Vgs) at Vds=10V
+* Confirms Vth and gfs=dId/dVgs match the datasheet before loop design.
+.include ../models/ixfn360n10t.lib
+Vds d 0 10
+Vgs g 0 0
+M1 d g 0 0 IXFN360N10T
+.dc Vgs 3.5 6.5 0.02
+.probe I(Vds)
+.backanno
+.end

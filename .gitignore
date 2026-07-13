@@ -10,3 +10,19 @@ __pycache__/
 hardware/*-backups/
 hardware/*.kicad_sch-bak
 hardware/*.kicad_pcb-bak
+
+# KiCad lock files & editor local history
+hardware/~*.lck
+hardware/.history/
+
+# Simulation run products (regenerate with LTspice / make_figs.py)
+hardware/sim/netlists/*.raw
+hardware/sim/netlists/*.log
+hardware/sim/netlists/*.op.raw
+hardware/sim/out/
+
+# KiCad autosaves, rescue files, per-user project state
+hardware/_autosave-*
+hardware/*.kicad_prl
+hardware/fp-info-cache
+hardware/*-rescue.*
