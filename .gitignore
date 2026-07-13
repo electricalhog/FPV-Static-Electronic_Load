@@ -20,3 +20,9 @@ hardware/sim/netlists/*.raw
 hardware/sim/netlists/*.log
 hardware/sim/netlists/*.op.raw
 hardware/sim/out/
+
+# KiCad autosaves, rescue files, per-user project state
+hardware/_autosave-*
+hardware/*.kicad_prl
+hardware/fp-info-cache
+hardware/*-rescue.*
